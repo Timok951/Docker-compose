@@ -6,7 +6,7 @@ WORKDIR /workdir/timeapp
 
 COPY . /workdir/timeapp/
 
-RUN npm install
+RUN npm install 
 
 EXPOSE 5000
 

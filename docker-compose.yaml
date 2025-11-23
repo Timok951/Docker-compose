@@ -1,37 +1,44 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:alpine
-    container_name: postgres-db
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: time_db
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: time_db
     ports:
-      - "15432:5432"
+      - "3306:3306"
+    restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p1234"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+      
   adminer:
     image: adminer
     container_name: adminer
     ports:
       - "8080:8080"
-
   backend:
     build: ./api
     container_name: backend
     depends_on:
-      - postgres
+      mysql:
+        condition: service_healthy
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432  
-      DB_USER: postgres
-      DB_PASSWORD: 1234
+      DB_HOST: mysql
+      DB_PORT: 3306 
+      DB_ROOT_PASSWORD: 1234
       DB_NAME: time_db
     ports:
       - "5555:5000" 
+    restart: always
+
 
   frontend:
     build: ./frontend
@@ -39,10 +46,10 @@ services:
     depends_on:
       - backend
     ports:
-      - "5173:5173"
+      - "8954:8954"
     volumes:
       - ./frontend:/workdir/timeapp
       - /workdir/timeapp/node_modules
 
 volumes:
-  postgres_data:
+  mysql_data:

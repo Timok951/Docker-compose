@@ -1,12 +1,13 @@
-FROM node:20
+FROM node:alpine
+
+LABEL version = "1"
 
 WORKDIR /workdir/timeapp
 
-COPY package*.json ./
+COPY . /workdir/timeapp/
+
 RUN npm install
 
-COPY . .
+EXPOSE 8954
 
-EXPOSE 5173
-
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["npm","run", "dev"]
